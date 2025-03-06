@@ -1,0 +1,50 @@
+@font-face {
+  font-family: "Fira Code";
+  src: url('../assets/FiraCode-Regular.ttf') format('truetype');
+}
+
+* {
+  font-family: "Fira Code";
+  box-sizing: border-box;
+  color: #f2f2f2;
+}
+
+h1 {
+  margin-block-start: 20px;
+  margin-block-end: 10px;
+}
+
+ul {
+  margin-block-start: 0;
+  margin-block-end: 0;
+  padding-inline-start: 0px;
+}
+
+li {
+  list-style: none;
+  margin-left: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+body {
+  background-color: #0c0c0c;
+}
+
+#todo li {
+  color: #61d6d6;
+}
+
+#doing li {
+  color: #16c60c;
+}
+
+#doing li::before {
+  content: "> ";
+}
+
+#done li {
+  text-decoration: line-through;
+  color: #3b78ff;
+}
