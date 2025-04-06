@@ -1,14 +1,18 @@
-const tasks = {
-  TODO: [],
-  DOING: [],
-  DONE: [],
+const TASK_STATUS = {
+  TODO: 'TODO',
+  DOING: 'DOING',
+  DONE: 'DONE'
 }
 
-const lists = {
-  TODO: document.querySelector('#todo ul'),
-  DOING: document.querySelector('#doing ul'),
-  DONE: document.querySelector('#done ul'),
-}
+const tasks = {};
+tasks[TASK_STATUS.TODO] = [];
+tasks[TASK_STATUS.DOING] = [];
+tasks[TASK_STATUS.DONE] = [];
+
+const lists = {};
+lists[TASK_STATUS.TODO] = document.querySelector('#todo ul');
+lists[TASK_STATUS.DOING] = document.querySelector('#doing ul');
+lists[TASK_STATUS.DONE] = document.querySelector('#done ul');
 
 const loadTasks = async () => {
   try {
@@ -32,26 +36,26 @@ const loadTasks = async () => {
     tasks[t.status].push(t);
   });
 
-  tasks.TODO.sort((a, b) => a - b);
-  tasks.DOING.sort((a, b) => a - b);
-  tasks.DONE.sort((a, b) => a - b);
+  tasks[TASK_STATUS.TODO].sort((a, b) => a - b);
+  tasks[TASK_STATUS.DOING].sort((a, b) => a - b);
+  tasks[TASK_STATUS.DONE].sort((a, b) => a - b);
 
-  tasks.TODO.forEach((t) => addItemToList(t, 'TODO'));
+  tasks[TASK_STATUS.TODO].forEach((t) => addItemToList(t, TASK_STATUS.TODO));
 
-  tasks.DOING.forEach((t) => addItemToList(t, 'DOING'));
+  tasks[TASK_STATUS.DOING].forEach((t) => addItemToList(t, TASK_STATUS.DOING));
 
-  tasks.DONE.forEach((t) => addItemToList(t, 'DONE'));
+  tasks[TASK_STATUS.DONE].forEach((t) => addItemToList(t, TASK_STATUS.DONE));
 
   document.querySelector('main').addEventListener('click', (event) => {
     const target = event.target;
     const id = target.id;
     if(target.classList.contains('todo')) {
-      updateTaskFromTo(id, 'TODO', 'DOING');
+      updateTaskFromTo(id, TASK_STATUS.TODO, TASK_STATUS.DOING);
       return;
     }
 
     if(target.classList.contains('doing')) {
-      updateTaskFromTo(id, 'DOING', 'DONE');
+      updateTaskFromTo(id, TASK_STATUS.DOING, TASK_STATUS.DONE);
       return;
     }
   });
@@ -61,25 +65,43 @@ const loadTasks = async () => {
     const target = event.target;
     const id = target.id;
     if(target.classList.contains('doing')) {
-      updateTaskFromTo(id, 'DOING', 'TODO');
+      updateTaskFromTo(id, TASK_STATUS.DOING, TASK_STATUS.TODO);
       return;
     }
 
     if(target.classList.contains('done')) {
       const id = target.id;
-      updateTaskFromTo(id, 'DONE', 'DOING');
+      updateTaskFromTo(id, TASK_STATUS.DONE, TASK_STATUS.DOING);
       return;
     }
   });
 })()
 
-const updateTaskFromTo = (id, from, to) => {
+const updateTaskFromTo = async (id, from, to) => {
   const taskIndex = tasks[from].findIndex(t => t.id === id);
   if(taskIndex >= 0) {
     const tasksFound = tasks[from].splice(taskIndex, 1);
-    tasks[to].push(tasksFound[0]);
     removeItemFromList(tasksFound[0].id);
     addItemToList(tasksFound[0], to);
+
+    try {
+      await fetch(`http://localhost:8080/task-list/tasks/${tasksFound[0].id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: to }),
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+    } catch(errorUpdatingTask) {
+      console.log('Error updating task!');
+      console.log(errorUpdatingTask);
+
+      removeItemFromList(tasksFound[0].id);
+      addItemToList(tasksFound[0], from);
+      return;
+    }
+
+    tasks[to].push(tasksFound[0]);
   }
 }
 
