@@ -6,7 +6,7 @@ import express from 'express';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const CLIENT_ID = '34w4yzqpsmv2yy9ws18lgn1hjskif1';
+const CLIENT_ID = '';
 const RESPONSE_TYPE = 'code';
 
 export default function addAuthRoutes(app) {
